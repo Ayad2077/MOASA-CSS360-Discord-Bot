@@ -20,6 +20,18 @@ The specific functionality of the bot is to simulate a card game of Mafia.
   - Alexandra
   - Sari
   - Ayad
+ 
+## Sprint 1 (Version 1.0)
+
+Sprint 1 focused on setting up a working Discord bot and implementing initial features.
+
+Completed features include:
+- Welcome message with a meme when a new user joins the server
+- Initial setup for the Mafia game
+- Defined Mafia game rules
+- /join command for players to join a game
+- Direct messages sent to players when enough users have joined
+
 
 ## Course Context
 This project is part of CSS360 and is under active development.
@@ -105,4 +117,5 @@ You can now run the code in the repository using the command line by typing the 
 
 ## Remember: Keep your repository private if you have a .env file in it! Keys and tokens are passwords!
 ## Remember: If you make changes in codespaces, commit and push when done!
+
 
