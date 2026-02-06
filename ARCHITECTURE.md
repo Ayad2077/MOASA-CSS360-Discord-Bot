@@ -41,6 +41,34 @@ Modularity: The game logic is decoupled from the Discord API wrapper, allowing f
 
 Persistence: By using a dedicated state storage, the bot can maintain game integrity even when multiple events (like simultaneous votes) occur.
 
+## Activity Diagram: Mafia Game Lifecycle
+
+### Overview
+This activity diagram represents the full lifecycle of a Mafia game from a player interaction perspective.
+It models the sequence of actions and decisions taken by both players and the bot, beginning with player recruitment and ending with win condition evaluation and game termination.
+
+### Diagram
+![Mafia Game Activity Diagram](./docs/diagram/Activity-Diagram.png)
+
+### Description
+The flow begins when a user executes the `/join` command. If no recruitment window is active, the bot opens a timed join window and registers the initiating player.
+Additional players may join until the countdown expires.
+
+Once recruitment closes, the bot checks whether the minimum number of players has been met. If so, roles are assigned and stored in memory, and the game enters the night phase.
+
+During the night phase, Mafia members secretly choose a target while the Doctor selects a player to protect.
+The bot resolves these actions and announces the outcome at the start of the day phase.
+
+During the day phase, players discuss publicly and vote to eliminate a suspect. If a tie occurs, the voting process repeats.
+After a player is eliminated, the bot evaluates win conditions. If no win condition is met, the game returns to the night phase and the cycle continues.
+
+The game ends when a win condition is satisfied, at which point the bot announces the winner and terminates the game session.
+
+### Architectural Significance
+This activity diagram highlights:
+- The **event-driven game loop** used by the bot
+- Decision points that control phase transitions
+- How asynchronous user input and timed events affect game progression
 
 ## Control-flow: User Command Handling
 
