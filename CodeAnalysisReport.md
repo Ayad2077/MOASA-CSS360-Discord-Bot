@@ -17,7 +17,6 @@ Move role definitions into a dedicated configuration or data module such as:
 
 /data/roles.js
 
-
 Then import it wherever needed.
 
 Issue 2: Mixed Responsibilities in Command Files
@@ -28,11 +27,8 @@ Problem
 Command files handle multiple responsibilities:
 
 game logic lookup
-
 formatting output
-
 UI response creation
-
 business rules
 
 Impact
@@ -65,3 +61,7 @@ Encapsulate game state behind functions or a class:
 
 getPlayerRole(userId)
 setPlayerRole(userId, role)
+
+### User Story
+
+As a developer, I want game data and state logic separated from command handlers so that new features can be added without breaking existing gameplay.
