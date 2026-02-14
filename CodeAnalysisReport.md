@@ -363,7 +363,7 @@ The goal is to explore execution paths that normal user interaction may not reac
 ### Description
 The `join` command assumes the guild member cache always exists.
 The command accesses `guild.members.cache` without verifying that the interaction originated from a guild.
-![Join crash](images/fuzz-join-null.png)
+![Join crash](./docs/code-analysis/fuzz-join-null.png)
 
 ### Impact
 The bot might crash when:
@@ -386,7 +386,7 @@ if (!interaction.guild || !interaction.guild.members) {
 ### Description
 The error occurs inside an awaited async command execution and propagates through the promise queue.
 Observed stack trace shows propagation through processTicksAndRejections.
-![Async crash](images/fuzz-async-propagation.png)
+![Async crash](./docs/code-analysis/fuzz-async-propagation.png)
 
 ### Impact
 This may cause:
@@ -401,7 +401,7 @@ Add structured validation before async operations and isolate state mutation fro
 ### Description
 Once a command throws an exception, the global interaction handler responds and execution flow stops.
 Subsequent command logic in the same runtime context becomes unreachable.
-![Error count](images/fuzz-error-count.png)
+![Error count](./docs/code-analysis/fuzz-error-count.png)
 
 ### Impact
 This may cause: 
