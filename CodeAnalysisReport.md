@@ -132,9 +132,122 @@ UI update logic
 game start logic
 Separating these responsibilities would reduce complexity and improve maintainability.
 
-# Code Analysis Report(3)
+# Code Analysis Report(4)
+
+## Alexandra – Test Coverage & Quality Assessment
+
+### Overview
+This section of the report measures the test coverage of our Mafia Discord Bot in order to identify any weaknesses in our code structure, logic branching, and overall maintainability.
+
+Test coverage was measured using:
+
+* node --test (Node.js's built-in test runner)
+* c8 (a JavaScript code coverage tool)
+
+The test was executed using:
+
+* NODE_ENV=test c8 node --test
+
+All 7 tests given were passed successfully.
+
+### Coverage Results
+![Final Coverage Results](./docs/code-analysis/test-coverage.png)
+
+The statement and line coverages are relatively strong (~75%), which indicates that most of our code paths are tested. However, the function coverage is significantly lower, which means that several defined functions for the test were not fully exercised.
+
+### Components Covered by Tests
+
+1. Command Logic
+
+The following commands were tested:
+
+* join.js for channel validation
+* reset.js for state clearing
+* role.js for role retrieval behavior
+* role assignment logic was also tested via helpers
+
+2. Game State Helpers
+
+The following helper functions reached 100% coverage:
+
+* resetGame()
+* assignRoles()
+
+These functions verified that the code properly clears the game state, assigns roles correctly, and maintains consistent game data. 
+
+### Technical Challenges
+
+I came across various technical challenges as I was measuring test coverage for this report. Below are descriptions of said issues, as I thought they were important to mention. 
+
+
+Issue 1: ESM vs CommonJS Compatibility
+
+The project uses:
+"type": "module"
+
+However, discord.js is distributed as a CommonJS module, and this caused runtime errors during the execution of my test coverage analysis. Errors included named export errors and constructor initialization failures. 
+
+Resolution:
+
+I adjusted the import structures to use default imports and prevent Discord-specific constructors from executing during tests by wrapping them in environment checks: if (process.env.NODE_ENV !== "test"). This allowed logic to be tested seperately from Discord's runtime behavior. 
+
+
+Issue 2: Discord Runtime Code Executing During Tests
+
+Command files exported:
+
+The command files originally exported Discord command builders that executed at module load time, which caused test failures when Discord objects weren;t available.
+
+Resolution:
+
+Command metadata creation was conditionally wrapped to prevent any execution in the test, which improved the isolation of logic and increased the reliability of the test. 
+
+
+Issue 3: Tight Coupling to Discord Client Internals
+
+Certain command logic depended directlky on Discord client internals such as cached users, which made the mocking for the tests more complicated to execute. As a result, more complex mocks were required and the isolation of logic was more diffcult to implement for said tests.
+
+### Identified Weaknesses from Coverage Results
+
+1. Low Function Coverage (36.84%)
+
+Although statements and lines are ~75%, the function coverage is significantly lower.
+
+This indicates that some code paths aren't executed during testing, and that certain command flows aren't being fully simulated.
+
+As an example, the recruitment flow in join.js couldn't be fully tested, as well as the countown timing logic. 
+
+2. join.js Has Partial Coverage (~57%)
+
+Uncovered areas in the command include:
+* Countdown loop
+* Game start condition
+* Minimum player failure branch
+* Message edit handling
+
+The reason these areas weren't properly covered in the test was because they depend on time-based loops, along with asynchronous Discord interactions and real-message editing behavior, which could not be mocked for these tests. 
+
+3. Time-Dependent Logic Reduces Testability
+
+The 15-second recruitment countdown in join.js, while helpful for the game lobby, increases complexity, slows down automated testing, and limits the branch coverage for the code. ]
+
+Recommendation:
+
+Introduce a configurable timer duration for test environemnts to imporve the test coverage and reduce the execution time. 
+
+### Architectural Insights from Testing
+
+Through the process of measuring test coverage, several design limitations became visible:
+* Logic and Discord response formatting are mixed together
+* Global mutable state prevents multiple games from running at the same time
+* Commands have too many responsibilities inside a singular method
+* Some code executes at module load time rather than the runtime
+
+Testing the code coverage exposed these weaknesses that weren't immediately visible during our code development.
+
+# Code Analysis Report(6)
 ## Sari Ando – Fuzz Testing Analysis
-(3) Fuzz Testing Analysis
+(6) Fuzz Testing Analysis
 
 This report presents three representative issues discovered during fuzz testing.
 
@@ -210,151 +323,3 @@ The bot is currently icomplete and still lacks sufficient error handling.
 Even a single malformed interaction can cause unstable behavior or halt further execution paths.  
 Stability and fault tolerance can be improved by adding validation guards and isolating command execution. 
 Stability and fault tolerance can be improved by adding validation guards and isolating command execution. 
-
-# Code Analysis Report(4)
-
-## Alexandra – Test Coverage & Quality Assessment
-
-### Overview
-The purpose of this section was to measure automated test coverage of the Mafia Discord Bot and identify weaknesses in code structure, logic branching, and maintainability.
-
-Test coverage was measured using:
-
-* node --test (Node.js built-in test runner)
-* c8 (JavaScript code coverage tool)
-
-The test suite was executed using:
-
-* NODE_ENV=test c8 node --test
-
-All 7 tests passed successfully.
-
-### Coverage Results
-![Final Coverage Results](./docs/code-analysis/test-coverage.png)
-
-Statement and line coverage are relatively strong (~75%), indicating most executable code paths are tested. However, function coverage is significantly lower, meaning several defined functions are not fully exercised during testing.
-
-### Components Covered by Tests
-
-1. Command Logic
-
-The following commands were tested:
-
-* join.js → channel validation
-* reset.js → state clearing
-* role.js → role retrieval behavior
-* role assignment logic via helpers
-
-2. Game State Helpers
-
-The following helper functions reached 100% coverage:
-
-* resetGame()
-* assignRoles()
-
-These functions are fully tested and verified to:
-
-* Properly clear state
-* Assign roles correctly
-* Maintain consistent game data
-
-### Technical Challenges Encountered
-
-Issue 1: ESM vs CommonJS Compatibility
-
-The project uses:
-"type": "module"
-
-However, discord.js is distributed as CommonJS.
-
-This caused errors such as:
-* Named export errors
-* SlashCommandBuilder is not a constructor
-
-Resolution:
-
-* Switched to default import pattern
-* Prevented Discord constructors from executing during tests using:
-    * if (process.env.NODE_ENV !== "test")
-* This allowed business logic to be tested independently of Discord runtime behavior.
-
-Issue 2: Discord Runtime Code Executing During Tests
-
-Command files exported:
-
-* export const data = new SlashCommandBuilder()
-* This executed immediately when imported, causing test failures.
-
-Resolution:
-
-* Command metadata creation was conditionally wrapped so that:
-    * In production → Discord command is built normally
-    * In test environment → Only logic is loaded
-* This improved test stability significantly.
-
-Issue 3: Tight Coupling to Discord Client Internals
-
-Some logic depended on:
-
-* client.users.cache.get(id)
-
-This made mocking difficult and revealed that business logic was tightly coupled to the Discord API.
-
-Impact:
-
-* More complex mocks required
-* Harder isolation of logic
-* Reduced modularity
-
-### Identified Weaknesses from Coverage Results
-
-1. Low Function Coverage (36.84%)
-
-Although statements and lines are ~75%, function coverage is significantly lower.
-
-This indicates:
-
-* Some code paths are not executed during testing
-* Certain command flows are not fully simulated
-
-Example:
-
-* Full successful recruitment flow in join.js is not fully tested
-* Countdown timing logic remains untested
-
-2. join.js Has Partial Coverage (~57%)
-
-Uncovered areas include:
-* Countdown loop
-* Game start condition
-* Minimum player failure branch
-* Message edit handling
-
-Reason:
-
-These behaviors depend on:
-* Time-based loops
-* Asynchronous Discord interactions
-* Real message editing behavior
-
-These are difficult to simulate in a pure unit test environment.
-
-3. Time-Dependent Logic Reduces Testability
-
-The 15-second recruitment countdown introduces:
-* Delayed execution
-* Increased complexity
-* Hard-to-test branches
-
-Recommendation:
-* Inject configurable timer duration for test environments.
-
-### Architectural Insights from Testing
-
-Through the process of achieving test coverage, several design limitations became visible:
-* Business logic and Discord response formatting are mixed together.
-* Global mutable state prevents multiple concurrent games.
-* Commands perform too many responsibilities inside single functions.
-* Some code executes at module load time instead of runtime.
-
-Testing exposed structural design weaknesses that were not immediately visible during development.
