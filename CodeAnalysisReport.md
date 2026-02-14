@@ -189,7 +189,7 @@ Discord.js is distributed as a CommonJS module, so this caused runtime errors du
 
 Resolution:
 
-I adjusted the import structures to use default imports and prevent Discord-specific constructors from executing during tests by wrapping them in environment checks: if (process.env.NODE_ENV !== "test"). This allowed logic to be tested seperately from Discord's runtime behavior. 
+I adjusted the import structures to use default imports and prevent Discord-specific constructors from executing during tests by wrapping them in environment checks: if (process.env.NODE_ENV !== "test"). This allowed logic to be tested separately from Discord's runtime behavior. 
 
 
 Issue 2: Discord Runtime Code Executing During Tests
@@ -205,7 +205,7 @@ I conditionally wrapped command metadata creation to prevent any execution in th
 
 Issue 3: Tight Coupling to Discord Client Internals
 
-Certain command logic depended directly on Discord client internals such as cached users, which made the mocking for the tests more complicated to execute. As a result, more complex mocks were required and the isolation of logic was more diffcult to implement for said tests.
+Certain command logic depended directly on Discord client internals such as cached users, which made the mocking for the tests more complicated to execute. As a result, more complex mocks were required and the isolation of logic was more difficult to implement for said tests.
 
 ### Identified Weaknesses from Coverage Results
 
@@ -215,7 +215,7 @@ Although statement and line coverage are ~75%, the function coverage is signific
 
 This indicates that some code paths weren't executed during testing, and that certain command flows weren't being fully simulated.
 
-As an example, the recruitment flow in join.js couldn't be fully tested, as well as the countown timing logic. 
+As an example, the recruitment flow in join.js couldn't be fully tested, as well as the countdown timing logic. 
 
 2. join.js Has Partial Coverage (~57%)
 
