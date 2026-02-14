@@ -353,3 +353,34 @@ From this tester, we were able to reveal the runtime reliability and architectur
 The bot is currently incomplete and still lacks sufficient error handling.
 Even a single malformed interaction can cause unstable behavior or halt further execution paths.  
 Stability and fault tolerance can be improved by adding validation guards and isolating command execution. 
+
+# Code Analysis Report(6)
+
+## Oliver - Scope Proposal
+
+## Overview
+This section focuses on the limitations currently present in our bot and explores how we can resolve these limitations.
+
+## Weaknesses and Limitations
+Along with the code issues and weaknesses outlined in this document, our bot still needs some major refinement. Currently, we have only implemented the basic shell of our game: player recruitment, role assignment, and state storage. We have yet to implement the actual game loop which defines how the players interact and the different permissions of each role. To move forward, we must prioritize implementing the different phases of the game.
+
+## Night Phase
+The night phase is the phase where the Mafia chooses a target and the Doctor chooses a player to save. We must implement the following:
+- Targeting logic: A secure way for the Mafia to select a target and the Doctor to select a person to save, ensuring their selections are not visisble to other players.
+- Conflict checking: A function to compare the Mafia's target vs. the Doctor's save to determine if a kill was successful or prevented.
+- Announcement: The bot must announce the result of the night phase after it processes if the kill was successful.
+
+## Day Phase
+During the day phase, players have the chance to discuss who they think is the Mafia and cast their votes.
+- Timer: We must determine how much time should be given during the day phase and implement a countdown system.
+- Voting: A mechanism that tracks votes in real-time, ensuring that each player can only vote once per cycle.
+- Tie-breaking: If there is a tie in voting results, players should be prompted to vote again, as shown in the [activity diagram](./ARCHITECTURE.md).
+- Elimination execution: Once voting has been finalized, the bot must update the `Alive` status of the eliminated player and check if a win condition has be met.
+
+## Permissions and Access Control
+Once we have implemented the different phases, we can focus on controlling permissions to prevent state corruption and logic errors.
+- Phase-restricted commands: To maintain game integrity, commands must be restricted based on the current phase. For example, the `/vote` command should be disabled during the night phase.
+- Status checking: The bot must verify that a player is `Alive` before processing their input, preventing eliminated players from participating further.
+
+## Conclusion
+Implementing these features is crucial for the development of our bot. By prioritizing the game cycle and phase-based permissions, we will be able to deliver a playable experience and explore further improvements to our bot.
