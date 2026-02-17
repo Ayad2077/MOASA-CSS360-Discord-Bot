@@ -1,10 +1,19 @@
 // helpers/gameState.js
 export const joinedPlayers = new Set();
 export const playerRoles = new Map();
-export let gameActive = false;
+export const alivePlayers = new Set();
+
+export let currentPhase = "PRE_GAME";
+export let nightActions = {
+  mafiaTarget: null,
+  doctorTarget: null
+};
 
 export function resetGame() {
   joinedPlayers.clear();
   playerRoles.clear();
-  gameActive = false;
+  currentPhase = "PRE_GAME";
+  nightActions = { mafiaTarget: null, doctorTarget: null };
 }
+
+export const setPhase = (phase) => { currentPhase = phase; };

@@ -1,6 +1,7 @@
 import { SlashCommandBuilder } from "discord.js";
 import { assignRoles } from "../helpers/roles.js";
 import { joinedPlayers, playerRoles } from "../helpers/gameState.js";
+import { startNight } from "../helpers/gameEngine.js";
 
 let joinOpen = false;
 //const joinedPlayers = new Set();
@@ -89,10 +90,14 @@ export default {
       // store roles for /role command
       for (const [userId, role] of roles.entries()) {
         playerRoles.set(userId, role);
+        alivePlayers.add(userId);
       }
+      
+      await startNight(interaction.client, interaction.channel);
     }
   }
 };
+
 
 function generateJoinText(timeLeft, client, players) {
   return "🕵️ **Mafia Game Recruitment!**\n" +
