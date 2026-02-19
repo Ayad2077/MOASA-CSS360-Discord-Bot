@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from "discord.js";
 import { assignRoles } from "../helpers/roles.js";
-import { joinedPlayers, playerRoles } from "../helpers/gameState.js";
+import { joinedPlayers, playerRoles, alivePlayers } from "../helpers/gameState.js";
 import { startNight } from "../helpers/gameEngine.js";
 
 let joinOpen = false;
@@ -42,6 +42,7 @@ export default {
     // Start joining(first person)
     joinOpen = true;
     joinedPlayers.clear();
+    alivePlayers.clear();
     joinedPlayers.add(userId);
 
     let remaining = 15; // Set to 15 seconds

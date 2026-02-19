@@ -9,11 +9,14 @@ export let nightActions = {
   doctorTarget: null
 };
 
+export let votes = new Map();
+
 export function resetGame() {
   joinedPlayers.clear();
   playerRoles.clear();
   currentPhase = "PRE_GAME";
   nightActions = { mafiaTarget: null, doctorTarget: null };
+  votes.clear();
 }
 
 export const setPhase = (phase) => { currentPhase = phase; };
