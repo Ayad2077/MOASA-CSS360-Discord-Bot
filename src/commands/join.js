@@ -6,13 +6,12 @@ import {
   alivePlayers,
   gameRunning,
   setGameRunning,
-  currentGameId,
   setCurrentGameId,
   resetGame
 } from "../helpers/gameState.js";
 import { startNight } from "../helpers/gameEngine.js";
 
-import { bulkEnsure, incStat, beginGameSnapshot, cancelGameSnapshot } from "../helpers/stats.js";
+import { bulkEnsure, incStat, beginGameSnapshot } from "../helpers/stats.js";
 
 let joinOpen = false;
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -20,11 +19,20 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 function formatPlayers(client, players) {
   if (players.size === 0) return "None";
   return [...players]
-    .map(id => {
+    .map((id) => {
       const user = client.users.cache.get(id);
       return user ? user.username : `<@${id}>`;
     })
     .join(", ");
+}
+
+function generateJoinText(timeLeft, client, players) {
+  return (
+    "Mafia Game Recruitment\n" +
+    "Type /join to participate.\n" +
+    `Closing in ${timeLeft} seconds.\n\n` +
+    `Current Players (${players.size}): ${formatPlayers(client, players)}`
+  );
 }
 
 export default {
@@ -42,7 +50,7 @@ export default {
       });
     }
 
-    // Joining is already open
+    // If recruitment is already open, just add the player
     if (joinOpen) {
       if (joinedPlayers.has(userId)) {
         return interaction.reply({ content: "You already joined.", ephemeral: true });
@@ -56,14 +64,16 @@ export default {
       });
     }
 
-  // Start joining(after first person joined)
-  if (joinOpen) {
+    // Otherwise, this user starts recruitment
+    joinOpen = true;
+
     if (joinedPlayers.has(userId)) {
-      return interaction.reply({ content: `⚠️ <@${userId}>, You already join. please don't type join command again!`, 
-      ephemeral: true 
-    });
-  }
-      
+      return interaction.reply({
+        content: `⚠️ <@${userId}>, you already joined. Please don't type /join again.`,
+        ephemeral: true
+      });
+    }
+
     joinedPlayers.add(userId);
 
     let remaining = 15;
@@ -136,12 +146,3 @@ export default {
     await startNight(interaction.client, interaction.channel);
   }
 };
-
-function generateJoinText(timeLeft, client, players) {
-  return (
-    "Mafia Game Recruitment\n" +
-    "Type /join to participate.\n" +
-    `Closing in ${timeLeft} seconds.\n\n` +
-    `Current Players (${players.size}): ${formatPlayers(client, players)}`
-  );
-}
