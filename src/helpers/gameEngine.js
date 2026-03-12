@@ -11,6 +11,8 @@ import {
 
 import { incStat, endGameSnapshot } from "./stats.js";
 
+let dayCount = 1; //Day tracking variable
+
 /*
   gameEngine.js
 
@@ -63,6 +65,7 @@ function finalizeGameSnapshotIfAny() {
   if (!currentGameId) return;
   endGameSnapshot(currentGameId);
   setCurrentGameId(null);
+  dayCount = 1;
 }
 
 /*
@@ -77,6 +80,9 @@ function finalizeGameSnapshotIfAny() {
 */
 export const startNight = async (client, channel) => {
   let nightAccomplished = false;
+
+  //Display day header at night start
+  await channel.send(`\n━━━━━━━━━━━━━━━\n🌙 **DAY ${dayCount} : NIGHT PHASE**\n━━━━━━━━━━━━━━━`);
 
   // Reset targets at the start of each night.
   // Important: this happens once per night, not once per match.
@@ -170,6 +176,10 @@ export const startNight = async (client, channel) => {
 */
 async function resolveNight(client, channel) {
   setPhase("DAY");
+
+  //Increment day and show header
+  dayCount++;
+  await channel.send(`\n━━━━━━━━━━━━━━━\n☀️ **DAY ${dayCount} : MORNING PHASE**\n━━━━━━━━━━━━━━━`);
 
   const { mafiaTarget, doctorTarget } = nightActions;
 
