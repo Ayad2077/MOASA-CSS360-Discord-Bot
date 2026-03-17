@@ -1,4 +1,10 @@
-import { SlashCommandBuilder } from "discord.js";
+import { 
+  SlashCommandBuilder, 
+  ActionRowBuilder, 
+  ButtonBuilder, 
+  ButtonStyle, 
+  ComponentType 
+} from "discord.js";
 import { assignRoles } from "../helpers/roles.js";
 import {
   joinedPlayers,
@@ -11,11 +17,9 @@ import {
   resetGame
 } from "../helpers/gameState.js";
 import { startNight } from "../helpers/gameEngine.js";
-
 import { bulkEnsure, incStat, beginGameSnapshot, cancelGameSnapshot } from "../helpers/stats.js";
 import { dmRoles } from "../helpers/dmRoles.js";
 
-let joinOpen = false;
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function formatPlayers(client, players) {
@@ -28,10 +32,19 @@ function formatPlayers(client, players) {
     .join(", ");
 }
 
+function generateJoinText(timeLeft, client, players) {
+  return (
+    "**Mafia Game Recruitment**\n" +
+    "Click the button below to participate!\n" +
+    `Closing in **${timeLeft}** seconds.\n\n` +
+    `Current Players (${players.size}): ${formatPlayers(client, players)}`
+  );
+}
+
 export default {
   data: new SlashCommandBuilder()
     .setName("join")
-    .setDescription("Join the Mafia game"),
+    .setDescription("Start a Mafia game lobby"),
 
   async execute(interaction) {
     const userId = interaction.user.id;
@@ -43,40 +56,54 @@ export default {
       });
     }
 
-    // Start joining(after first person joined)
-  if (joinOpen) {
-    if (joinedPlayers.has(userId)) {
-      return interaction.reply({ content: `⚠️ <@${userId}>, You have already joined the game. Please don't type join command again!`, 
-      ephemeral: true 
-    });
-  }
-
-      joinedPlayers.add(userId);
-
-      return interaction.reply({
-        content: `You joined the game. Total players: ${joinedPlayers.size}`,
-        ephemeral: true
-      });
-    }
-
-    // Start joining (This block was missing a closing bracket at the end)
-    joinOpen = true; // Added this so the loop actually triggers correctly
-
     joinedPlayers.clear(); //Clear the last list
     joinedPlayers.add(userId);
 
     let remaining = 15;
 
-    await interaction.reply({
+    // Join button
+    const joinButton = new ButtonBuilder()
+      .setCustomId('join_game')
+      .setLabel('Join Game')
+      .setStyle(ButtonStyle.Primary);
+
+    const row = new ActionRowBuilder().addComponents(joinButton);
+
+    const initialMessage = await interaction.reply({
       content: generateJoinText(remaining, interaction.client, joinedPlayers),
+      components: [row],
       fetchReply: true
+    });
+
+    // Collector for button interactions
+    const collector = initialMessage.createMessageComponentCollector({
+      componentType: ComponentType.Button,
+      time: remaining * 1000
+    });
+
+    collector.on('collect', async (i) => {
+      if (joinedPlayers.has(i.user.id)) {
+        return i.reply({ 
+          content: "⚠️ You have already joined this lobby!", 
+          ephemeral: true 
+        });
+      }
+
+      joinedPlayers.add(i.user.id);
+
+    await interaction.editReply({
+      content: generateJoinText(remaining, interaction.client, joinedPlayers)
+    });
+
+    await i.reply({ 
+        content: "✅ You've joined the lobby!", 
+        ephemeral: true 
+      });
     });
 
     while (remaining > 0) {
       await sleep(1000);
       remaining--;
-
-      if (!joinOpen) break;
 
       try {
         await interaction.editReply({
@@ -84,28 +111,33 @@ export default {
         });
       } catch (error) {
         console.error("Update error:", error);
+        break;
       }
     }
-
+    
     // Finish recruitment
-    joinOpen = false;
     const finalSize = joinedPlayers.size;
 
     if (finalSize < 3) {
       resetGame();
       return interaction.editReply({
-        content: `Recruitment closed.\nNot enough players. (Min: 3, Current: ${finalSize})`
+        content: `Recruitment closed.\nNot enough players. (Min: 3, Current: ${finalSize})`,
+        components: [] // Remove buttons
       });
     }
 
     setGameRunning(true);
+    const disabledRow = new ActionRowBuilder().addComponents(
+        joinButton.setDisabled(true).setLabel('Game Started')
+    );
 
     await interaction.editReply({
       content:
         `Recruitment closed.\n` +
         `Total Players: ${finalSize}\n` +
         `Members: ${formatPlayers(interaction.client, joinedPlayers)}\n\n` +
-        `Roles have been assigned, please check your DMs for your role!\nYou may also use /role to view your role.`
+        `Roles have been assigned, please check your DMs for your role!\nYou may also use /role to view your role.`,
+      components: [disabledRow]
     });
 
     const roles = assignRoles(joinedPlayers);
@@ -136,14 +168,5 @@ export default {
     beginGameSnapshot(gameId, joinedPlayers);
 
     await startNight(interaction.client, interaction.channel);
-  } // Added closing bracket for execute function
-}; // Added closing bracket for export default
-
-function generateJoinText(timeLeft, client, players) {
-  return (
-    "Mafia Game Recruitment\n" +
-    "Type /join to participate.\n" +
-    `Closing in ${timeLeft} seconds.\n\n` +
-    `Current Players (${players.size}): ${formatPlayers(client, players)}`
-  );
-}
+  }
+}; 
