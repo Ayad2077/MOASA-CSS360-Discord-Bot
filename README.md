@@ -63,6 +63,8 @@ Completed features include:
 - Implemented an automated role displaying system where users receive a DM once the game starts, displaying their role, custom role-card images, and commands.
 - Implemented a button-based lobby for game recruitment
 - Implemented a button-based voting system during the day phase
+- Improved player clarity during the voting phase by displaying a real-time list of surviving players (aliveList).
+- Added validation to prevent duplicate player joins, ensuring users cannot join the same game multiple times.
 
 ## Commands
 
