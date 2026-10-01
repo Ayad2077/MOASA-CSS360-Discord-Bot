@@ -1,6 +1,6 @@
 {
-  "name": "moasa-discord-mafia-bot",
-  "version": "2.1.0",
+  "name": "memebot_discord",
+  "version": "1.0.0",
   "description": "A Discord.js Mafia game bot with automated game phases, role-specific actions, voting, persistent statistics, and multiplayer state management.",
   "scripts": {
     "build": "rm -rf build && esbuild src/*.js src/**/*.js --platform=node --format=cjs --outdir=build --outbase=src",
