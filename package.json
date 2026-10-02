@@ -1,5 +1,5 @@
 {
-  "name": "memebot_discord",
+  "name": "moasa-discord-mafia-bot",
   "version": "1.0.0",
   "description": "A Discord.js Mafia game bot with automated game phases, role-specific actions, voting, persistent statistics, and multiplayer state management.",
   "scripts": {
