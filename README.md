@@ -1,110 +1,108 @@
 # MOASA Discord Mafia Bot
 
-A five-person software engineering project that turns the social-deduction game **Mafia** into an automated Discord experience. The bot manages game state, role-specific actions, day/night transitions, voting, player status, and persistent statistics.
+A five-person software-engineering team project that automates the social-deduction game **Mafia** through Discord commands, role actions, day/night phases, voting, and player statistics.
 
 **Course:** CSS 360 Software Engineering, University of Washington Bothell  
-**Status:** Completed, Winter 2026
+**Project period:** Winter 2026  
+**Team:** Mini, Oliver, Alexandra, Sari, and Ayad  
+**Repository context:** portfolio fork of the team project
 
-## What the Project Demonstrates
+## Project Highlights
 
-- Event-driven application design with Discord.js
-- Centralized multiplayer game-state management
-- Role-specific command logic and permissions
-- Automated day/night phase transitions
-- Button-based lobby and voting interactions
-- Persistent player statistics and recent-game snapshots
-- Input validation and safeguards against invalid game actions
-- Team-based software development using Git and GitHub
+- Event-driven command and event handling with Discord.js.
+- Shared in-memory game state for player roles and phases.
+- Mafia, Doctor, Fortune Teller, and Civilian gameplay.
+- Recruitment and voting interactions.
+- Local-file persistence for player statistics and recent-game results.
+- Architecture diagrams, code analysis, and helper tests.
 
-## Core Gameplay
+This is a team project. The repository preserves shared authorship; its features are not presented as an individual implementation.
 
-Players join a lobby and are assigned Mafia, Doctor, Fortune Teller, or Civilian roles. The bot coordinates private role actions at night, public voting during the day, elimination logic, win conditions, and game resets.
+## Start Exploring
 
-Important safeguards include:
+- [Game engine](src/helpers/gameEngine.js): phase transitions, voting, and game resolution.
+- [Shared game state](src/helpers/gameState.js): player and phase state.
+- [Statistics](src/helpers/stats.js): local persistence.
+- [Architecture documentation](ARCHITECTURE.md): diagrams and design notes.
+- [Code analysis](CodeAnalysisReport.md): additional project analysis.
 
-- Preventing duplicate joins
-- Blocking mid-game resets from normal player actions
-- Tracking living and eliminated players
-- Restricting eliminated players from participating in active game chat
-- Validating actions by role and game phase
-- Resetting state after a completed match
+Some architecture notes describe earlier designs; consult the current source for exact paths and behavior.
 
 ## Main Commands
 
 | Command | Purpose |
-|---|---|
-| `/join` | Start or join a game lobby |
-| `/role` | View your assigned role privately |
-| `/kill <user>` | Mafia night action |
-| `/save <user>` | Doctor night action |
-| `/divine <user>` | Fortune Teller investigation |
-| `/rules` | Display game rules |
-| `/players` | Show current players and status |
-| `/stats` | Show lifetime and recent-game statistics |
-| `/reset` | Reset the game (admin) |
+| --- | --- |
+| `/join` | Start or join recruitment |
+| `/role` | View your role |
+| `/kill` | Mafia night action |
+| `/save` | Doctor night action |
+| `/divine` | Fortune Teller investigation |
+| `/rules` | Show game rules |
+| `/players` | List players and status |
+| `/stats` | Show player statistics |
+| `/reset` | Reset shared game state |
 
-The project also includes button-based recruitment and voting flows.
+## Local Setup
 
-## Technology
+Use **Linux, macOS, or WSL**: the build script uses `rm -rf` and shell globs. Native Windows shells require adapting that script.
 
-- JavaScript
-- Node.js
-- Discord.js
-- esbuild
-- Mocha / Chai
-- Docker
-
-## Project Structure
-
-```text
-src/
-├── app.js              # Discord client and top-level event wiring
-├── commands/           # Slash-command implementations
-├── events/             # Discord event handlers
-├── helpers/            # Shared game and utility logic
-├── fuzz/               # Fuzz-testing related code
-└── images/             # Game visuals
-```
-
-Additional project documentation is available in `ARCHITECTURE.md`, `CodeAnalysisReport.md`, and the `docs/` directory.
-
-## Setup
-
-Requirements:
-
-- Node.js
-- A Discord application and bot token
-
-Install dependencies:
+You need Node.js/npm and a Discord application with a bot account.
 
 ```bash
-npm install
+git clone https://github.com/Ayad2077/MOASA-CSS360-Discord-Bot.git
+cd MOASA-CSS360-Discord-Bot
+npm ci
 ```
 
 Create a local `.env` file:
 
-```text
+```dotenv
 TOKEN=your_discord_bot_token
 CLIENT_ID=your_discord_application_id
 ```
 
-Register slash commands and start the bot:
+The client requests Guild Members and Message Content intents; enable the corresponding privileged intents in the Discord Developer Portal. Invite the bot to a test server with bot and application-command scopes and the channel permissions required by the features you exercise.
+
+Register commands and start:
 
 ```bash
 npm run register
 npm start
 ```
 
-The `.env`, build output, dependencies, and runtime `data/` directory are excluded from version control.
+The register script publishes commands for the configured Discord application. Use a dedicated test application/server when exploring the project.
 
-## Team
+## Tests
 
-MOASA was developed by a five-person CSS 360 team:
+```bash
+npm test
+```
 
-- Mini
-- Oliver
-- Alexandra
-- Sari
-- Ayad
+The repository includes Mocha/Chai tests for command loading and helpers. These do not establish complete multiplayer or live Discord integration coverage.
 
-This repository is presented as a **team software-engineering project** rather than an individual build.
+## Technology & Structure
+
+**JavaScript · Node.js · Discord.js · esbuild · Mocha/Chai · Docker**
+
+```text
+src/
+├── app.js              # Discord client
+├── deploy-commands.js  # Slash-command registration
+├── commands/           # Command modules
+├── events/             # Discord event handlers
+├── helpers/            # Game engine, state, statistics, and loaders
+├── fuzz/               # Fuzz-related scripts
+└── images/             # Game visuals
+tests/                  # Helper and command-loading tests
+docs/                   # Design artifacts
+```
+
+## Current Limitations
+
+- Active game state is shared in memory; it is not isolated per Discord server.
+- The `/reset` description says “admin only,” but its current handler does not enforce an administrator permission check.
+- Statistics use local files rather than a database.
+- Architecture documentation includes earlier command names and paths.
+- Live gameplay requires a configured Discord bot and server.
+
+The repository excludes `.env`, dependencies, build output, and runtime `data/` from version control.
